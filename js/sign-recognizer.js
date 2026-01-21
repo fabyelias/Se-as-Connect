@@ -63,7 +63,172 @@ class SignRecognizer {
         let bestMatch = null;
         let bestConfidence = 0;
 
-        // Iterar sobre todos los gestos simples definidos
+        // Primero, hacer verificaciones rápidas para gestos muy específicos
+        // Esto ayuda a distinguir gestos similares
+
+        // PULGAR ARRIBA: solo pulgar extendido + dirección hacia arriba
+        if (fingersExtendedCount === 1 && fingerStates.thumb && thumbDirection === 'up') {
+            return {
+                key: 'thumbs_up',
+                name: 'Pulgar arriba',
+                text: 'Bien / De acuerdo',
+                confidence: 0.95,
+            };
+        }
+
+        // PULGAR ABAJO: solo pulgar extendido + dirección hacia abajo
+        if (fingersExtendedCount === 1 && fingerStates.thumb && thumbDirection === 'down') {
+            return {
+                key: 'thumbs_down',
+                name: 'Pulgar abajo',
+                text: 'Mal / No está bien',
+                confidence: 0.95,
+            };
+        }
+
+        // TELÉFONO/LLAMAME: pulgar y meñique extendidos, otros cerrados
+        if (fingerStates.thumb && !fingerStates.index && !fingerStates.middle &&
+            !fingerStates.ring && fingerStates.pinky && fingersExtendedCount === 2) {
+            return {
+                key: 'phone',
+                name: 'Teléfono',
+                text: 'Llamame / Teléfono',
+                confidence: 0.95,
+            };
+        }
+
+        // TE QUIERO (ILY): pulgar, índice y meñique extendidos
+        if (fingerStates.thumb && fingerStates.index && !fingerStates.middle &&
+            !fingerStates.ring && fingerStates.pinky && fingersExtendedCount === 3) {
+            return {
+                key: 'i_love_you',
+                name: 'Te quiero',
+                text: 'Te quiero',
+                confidence: 0.95,
+            };
+        }
+
+        // ROCK/CUERNOS: índice y meñique extendidos, pulgar cerrado
+        if (!fingerStates.thumb && fingerStates.index && !fingerStates.middle &&
+            !fingerStates.ring && fingerStates.pinky && fingersExtendedCount === 2) {
+            return {
+                key: 'rock',
+                name: 'Rock',
+                text: '¡Genial!',
+                confidence: 0.95,
+            };
+        }
+
+        // SEÑALAR/UNO: solo índice extendido
+        if (!fingerStates.thumb && fingerStates.index && !fingerStates.middle &&
+            !fingerStates.ring && !fingerStates.pinky && fingersExtendedCount === 1) {
+            return {
+                key: 'pointing',
+                name: 'Señalar / Uno',
+                text: '1',
+                confidence: 0.95,
+            };
+        }
+
+        // PAZ/DOS: índice y medio extendidos
+        if (!fingerStates.thumb && fingerStates.index && fingerStates.middle &&
+            !fingerStates.ring && !fingerStates.pinky && fingersExtendedCount === 2) {
+            return {
+                key: 'peace',
+                name: 'Paz / Dos',
+                text: '2',
+                confidence: 0.95,
+            };
+        }
+
+        // TRES: pulgar, índice y medio extendidos
+        if (fingerStates.thumb && fingerStates.index && fingerStates.middle &&
+            !fingerStates.ring && !fingerStates.pinky && fingersExtendedCount === 3) {
+            return {
+                key: 'three',
+                name: 'Tres',
+                text: '3',
+                confidence: 0.95,
+            };
+        }
+
+        // CUATRO: todos menos pulgar
+        if (!fingerStates.thumb && fingerStates.index && fingerStates.middle &&
+            fingerStates.ring && fingerStates.pinky && fingersExtendedCount === 4) {
+            return {
+                key: 'four',
+                name: 'Cuatro',
+                text: '4',
+                confidence: 0.95,
+            };
+        }
+
+        // CINCO/MANO ABIERTA: todos extendidos
+        if (fingerStates.thumb && fingerStates.index && fingerStates.middle &&
+            fingerStates.ring && fingerStates.pinky && fingersExtendedCount === 5) {
+            return {
+                key: 'open_hand',
+                name: 'Mano abierta',
+                text: 'Hola / 5',
+                confidence: 0.95,
+            };
+        }
+
+        // PUÑO: todos cerrados
+        if (!fingerStates.thumb && !fingerStates.index && !fingerStates.middle &&
+            !fingerStates.ring && !fingerStates.pinky && fingersExtendedCount === 0) {
+            return {
+                key: 'fist',
+                name: 'Puño',
+                text: 'Puño cerrado',
+                confidence: 0.95,
+            };
+        }
+
+        // LETRA L: pulgar e índice extendidos en L
+        if (fingerStates.thumb && fingerStates.index && !fingerStates.middle &&
+            !fingerStates.ring && !fingerStates.pinky && fingersExtendedCount === 2 && thumbDirection === 'side') {
+            return {
+                key: 'letter_l',
+                name: 'Letra L',
+                text: 'L',
+                confidence: 0.90,
+            };
+        }
+
+        // LETRA W: índice, medio y anular extendidos
+        if (!fingerStates.thumb && fingerStates.index && fingerStates.middle &&
+            fingerStates.ring && !fingerStates.pinky && fingersExtendedCount === 3) {
+            return {
+                key: 'letter_w',
+                name: 'Letra W',
+                text: 'W',
+                confidence: 0.95,
+            };
+        }
+
+        // OK: pulgar e índice tocándose con otros dedos extendidos
+        if (thumbIndexTouching && fingerStates.middle && fingerStates.ring && fingerStates.pinky) {
+            return {
+                key: 'ok_sign',
+                name: 'OK',
+                text: 'OK / Perfecto',
+                confidence: 0.90,
+            };
+        }
+
+        // MEÑIQUE/PROMESA: solo meñique
+        if (!fingerStates.thumb && !fingerStates.index && !fingerStates.middle &&
+            !fingerStates.ring && fingerStates.pinky && fingersExtendedCount === 1) {
+            return {
+                key: 'pinky_promise',
+                name: 'Promesa',
+                text: 'Te lo prometo',
+                confidence: 0.95,
+            };
+        }
+
+        // Si no hay coincidencia directa, usar el método de confianza
         for (const [gestureKey, gesture] of Object.entries(SimpleGestures)) {
             const confidence = this.calculateGestureConfidence(hand, gesture);
 
@@ -84,38 +249,89 @@ class SignRecognizer {
      * Calcula la confianza de coincidencia con un gesto
      */
     calculateGestureConfidence(hand, gesture) {
-        const { fingerStates, thumbDirection, thumbIndexTouching } = hand;
+        const { fingerStates, thumbDirection, thumbIndexTouching, fingersExtendedCount } = hand;
         const pattern = gesture.pattern;
 
         let matches = 0;
         let total = 5; // 5 dedos
+        let bonusPoints = 0;
 
         // Comparar estado de cada dedo
         for (const finger of ['thumb', 'index', 'middle', 'ring', 'pinky']) {
             const expected = pattern[finger];
             const actual = fingerStates[finger];
 
-            // Manejar casos especiales
-            if (expected === 'circle') {
-                // Para gesto OK, verificar que los dedos se tocan
+            // Manejar diferentes tipos de valores esperados
+            if (expected === 'circle' || expected === 'curved' || expected === 'touching') {
+                // Estados especiales - ser más permisivo
+                // Para círculo/curvado, el dedo puede estar parcialmente extendido o flexionado
                 if (finger === 'thumb' || finger === 'index') {
-                    if (thumbIndexTouching) matches++;
+                    if (thumbIndexTouching) {
+                        matches += 1;
+                    } else if (!actual) {
+                        // Si el dedo está flexionado, puede ser parte de un círculo
+                        matches += 0.7;
+                    }
+                } else {
+                    // Otros dedos en estado curvado
+                    matches += 0.8;
                 }
             } else if (typeof expected === 'boolean') {
-                if (expected === actual) matches++;
+                // Comparación simple: true = extendido, false = flexionado
+                if (expected === actual) {
+                    matches += 1;
+                } else {
+                    // Penalización parcial por no coincidir
+                    matches += 0;
+                }
+            } else if (expected === true || expected === false) {
+                if (expected === actual) {
+                    matches += 1;
+                }
             }
         }
 
         let confidence = matches / total;
 
-        // Verificaciones adicionales
-        if (gesture.thumbDirection && thumbDirection !== gesture.thumbDirection) {
+        // Verificaciones adicionales con bonificaciones/penalizaciones
+
+        // Verificar dirección del pulgar (importante para thumbs up/down)
+        if (gesture.thumbDirection) {
+            if (thumbDirection === gesture.thumbDirection) {
+                bonusPoints += 0.15; // Bonificación si coincide
+            } else if (gesture.thumbDirection === 'up' || gesture.thumbDirection === 'down') {
+                confidence *= 0.4; // Penalización fuerte si no coincide para thumbs up/down
+            }
+        }
+
+        // Verificar si requiere que pulgar e índice se toquen
+        if (gesture.special === 'thumb_index_touching') {
+            if (thumbIndexTouching) {
+                bonusPoints += 0.1;
+            } else {
+                confidence *= 0.3;
+            }
+        }
+
+        // Verificar cantidad de dedos extendidos para gestos numéricos
+        if (gesture.name && gesture.name.includes('Uno') && fingersExtendedCount !== 1) {
+            confidence *= 0.5;
+        }
+        if (gesture.name && gesture.name.includes('Dos') && fingersExtendedCount !== 2) {
+            confidence *= 0.5;
+        }
+        if (gesture.name && gesture.name.includes('Tres') && fingersExtendedCount !== 3) {
+            confidence *= 0.5;
+        }
+        if (gesture.name && gesture.name.includes('Cuatro') && fingersExtendedCount !== 4) {
+            confidence *= 0.5;
+        }
+        if (gesture.name && gesture.name.includes('Cinco') && fingersExtendedCount !== 5) {
             confidence *= 0.5;
         }
 
-        if (gesture.special === 'thumb_index_touching' && !thumbIndexTouching) {
-            confidence *= 0.3;
-        }
+        // Aplicar bonificación
+        confidence = Math.min(1.0, confidence + bonusPoints);
 
         return confidence;
     }

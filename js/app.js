@@ -465,9 +465,15 @@ class SenasConnectApp {
             timestamp,
         });
 
-        // Limitar historial
+        // Limitar historial en estado
         if (this.state.messageHistory.length > CONFIG.history.maxMessages) {
             this.state.messageHistory.shift();
+        }
+
+        // Limitar elementos en DOM para evitar problemas de memoria
+        const maxDomItems = 20;
+        while (this.elements.historyContainer.children.length >= maxDomItems) {
+            this.elements.historyContainer.removeChild(this.elements.historyContainer.firstChild);
         }
 
         // Crear elemento HTML
