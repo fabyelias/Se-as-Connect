@@ -29,9 +29,13 @@
     padding: 0;
 }
 
-html, body {
+html {
     height: 100%;
-    overflow: hidden;
+}
+
+body {
+    min-height: 100%;
+    overflow-x: hidden;
 }
 
 body {
@@ -228,15 +232,18 @@ body {
     border-radius: 12px;
     overflow: hidden;
     flex: 1;
-    min-height: 280px;
-    max-height: 400px;
+    min-height: 200px;
+    width: 100%;
 }
 
 .camera-video, .camera-canvas {
     position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     object-fit: contain;
+    background: #000;
 }
 
 .camera-video { transform: scaleX(-1); }
@@ -576,11 +583,18 @@ body {
    RESPONSIVE - MÓVIL VERTICAL
    ======================================== */
 @media (max-width: 768px) {
+    html, body {
+        height: auto;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
     .app-container {
         padding: 8px;
         gap: 8px;
         height: auto;
-        min-height: 100vh;
+        min-height: auto;
+        overflow: visible;
     }
 
     .header {
@@ -592,16 +606,16 @@ body {
     .logo-icon { display: none; }
 
     .main-content {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto auto auto;
-        gap: 8px;
-        overflow-y: auto;
-        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        overflow: visible;
+        height: auto;
     }
 
     .panel-divider {
         width: 100%;
-        height: 15px;
+        height: 20px;
         flex-shrink: 0;
     }
 
@@ -613,57 +627,131 @@ body {
     }
 
     .panel {
-        padding: 10px;
-        gap: 8px;
+        padding: 12px;
+        gap: 10px;
         border-radius: 12px;
         min-height: auto;
         flex: none;
+        width: 100%;
     }
 
-    .panel-header h2 { font-size: 0.75rem; }
+    .panel-header h2 { font-size: 0.85rem; }
     .panel-subtitle { display: none; }
 
+    /* CÁMARA - Tamaño fijo para móviles */
     .camera-container {
-        min-height: 250px;
-        max-height: 350px;
         width: 100%;
-        aspect-ratio: 4/3;
+        height: 280px;
+        min-height: 280px;
+        max-height: 350px;
+        position: relative;
+        background: #000;
+        border-radius: 8px;
+        overflow: hidden;
     }
 
     .camera-video, .camera-canvas {
-        object-fit: contain;
+        position: absolute;
+        top: 0;
+        left: 0;
         width: 100%;
         height: 100%;
+        object-fit: contain;
     }
 
-    .voice-output-container { min-height: 80px; padding: 12px; }
+    .voice-output-container {
+        min-height: 100px;
+        padding: 15px;
+    }
 
-    .output-text { font-size: 1rem; min-height: 30px; padding: 6px; }
-    .voice-text { font-size: 1.3rem; }
+    .output-text {
+        font-size: 1rem;
+        min-height: 40px;
+        padding: 8px;
+    }
 
-    .btn { padding: 7px 12px; font-size: 0.7rem; }
-    .btn-xlarge { padding: 8px 16px; font-size: 0.75rem; }
+    .voice-text {
+        font-size: 1.2rem;
+    }
+
+    .btn {
+        padding: 10px 14px;
+        font-size: 0.8rem;
+    }
+
+    .btn-xlarge {
+        padding: 12px 18px;
+        font-size: 0.85rem;
+        width: 100%;
+    }
 
     .output-actions, .voice-controls, .camera-controls {
-        gap: 6px;
+        gap: 8px;
         flex-wrap: wrap;
         justify-content: center;
+        width: 100%;
+    }
+
+    .output-actions .btn,
+    .voice-controls .btn,
+    .camera-controls .btn {
+        flex: 1;
+        min-width: 120px;
     }
 
     .message-history { display: none; }
 
     .select-camera {
-        max-width: 140px;
-        padding: 6px 8px;
+        width: 100%;
+        max-width: none;
+        padding: 10px;
+        font-size: 0.8rem;
+        margin-top: 8px;
+    }
+
+    /* Status indicators más pequeños en móvil */
+    .status-indicators {
+        top: 5px;
+        left: 5px;
+    }
+
+    .indicator {
+        padding: 3px 6px;
         font-size: 0.65rem;
+    }
+
+    .indicator-dot {
+        width: 6px;
+        height: 6px;
+    }
+
+    /* Modal responsive */
+    .modal-content {
+        margin: 10px;
+        padding: 15px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .instruction-step {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
     }
 }
 
 /* Móvil horizontal */
 @media (max-width: 900px) and (orientation: landscape) {
+    .app-container {
+        height: auto;
+        overflow-y: auto;
+    }
+
     .main-content {
+        display: grid;
         grid-template-columns: 1fr auto 1fr;
         grid-template-rows: 1fr;
+        gap: 10px;
     }
 
     .panel-divider {
@@ -674,19 +762,66 @@ body {
     .divider-icon { transform: none; }
 
     .panel { padding: 10px; gap: 6px; }
-    .camera-container { min-height: 80px; }
+
+    .camera-container {
+        height: 200px;
+        min-height: 150px;
+    }
+
     .voice-output-container { min-height: 80px; }
     .output-text { font-size: 0.9rem; min-height: 28px; }
-    .voice-text { font-size: 1.2rem; }
+    .voice-text { font-size: 1.1rem; }
     .message-history { display: none; }
 }
 
-/* Pantallas muy pequeñas */
+/* Pantallas muy pequeñas (iPhone SE, etc) */
 @media (max-width: 380px) {
-    .btn-icon { width: 30px; height: 30px; font-size: 0.8rem; }
-    .output-text { font-size: 0.9rem; }
-    .voice-text { font-size: 1.1rem; }
+    .app-container {
+        padding: 5px;
+        gap: 5px;
+    }
+
+    .header {
+        padding: 5px 8px;
+    }
+
+    .btn-icon { width: 28px; height: 28px; font-size: 0.75rem; }
+
+    .panel {
+        padding: 8px;
+        gap: 6px;
+    }
+
     .panel-header h2 { font-size: 0.7rem; }
+
+    .camera-container {
+        height: 220px;
+        min-height: 200px;
+    }
+
+    .output-text { font-size: 0.85rem; padding: 6px; }
+    .voice-text { font-size: 1rem; }
+
+    .btn {
+        padding: 8px 10px;
+        font-size: 0.7rem;
+    }
+
+    .btn-xlarge {
+        padding: 10px 12px;
+        font-size: 0.75rem;
+    }
+
+    .output-actions .btn,
+    .voice-controls .btn,
+    .camera-controls .btn {
+        min-width: 100px;
+    }
+
+    .select-camera {
+        padding: 8px;
+        font-size: 0.7rem;
+    }
 }
 
 /* ========================================
