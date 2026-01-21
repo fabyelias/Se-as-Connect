@@ -228,7 +228,8 @@ body {
     border-radius: 12px;
     overflow: hidden;
     flex: 1;
-    min-height: 120px;
+    min-height: 280px;
+    max-height: 400px;
 }
 
 .camera-video, .camera-canvas {

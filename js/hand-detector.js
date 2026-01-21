@@ -85,12 +85,14 @@ class HandDetector {
         try {
             this.log('Iniciando cámara...');
 
-            // Configuración de la cámara
+            // Configuración de la cámara - optimizada para mejor encuadre
             const constraints = {
                 video: {
                     width: CONFIG.camera.width,
                     height: CONFIG.camera.height,
                     frameRate: CONFIG.camera.frameRate,
+                    // Evitar zoom automático
+                    resizeMode: 'none',
                 },
             };
 
@@ -101,9 +103,28 @@ class HandDetector {
                 constraints.video.facingMode = CONFIG.camera.facingMode;
             }
 
+            // Intentar deshabilitar zoom si la cámara lo soporta
+            if (CONFIG.camera.advanced) {
+                constraints.video.advanced = CONFIG.camera.advanced;
+            }
+
             // Obtener stream de video
             const stream = await navigator.mediaDevices.getUserMedia(constraints);
             this.videoElement.srcObject = stream;
+
+            // Intentar resetear zoom a 1x si la cámara lo soporta
+            try {
+                const track = stream.getVideoTracks()[0];
+                const capabilities = track.getCapabilities();
+                if (capabilities.zoom) {
+                    await track.applyConstraints({
+                        advanced: [{ zoom: capabilities.zoom.min }],
+                    });
+                    this.log('Zoom de cámara reseteado a mínimo');
+                }
+            } catch (zoomError) {
+                this.log('No se pudo ajustar zoom: ' + zoomError.message);
+            }
 
             // Esperar a que el video esté listo
             await new Promise((resolve) => {

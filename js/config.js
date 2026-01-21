@@ -93,15 +93,21 @@ const CONFIG = {
     // CONFIGURACIÓN DE CÁMARA
     // ========================================
     camera: {
-        // Resolución preferida
-        width: { ideal: 1280, min: 640 },
-        height: { ideal: 720, min: 480 },
+        // Resolución preferida (más baja para evitar zoom digital)
+        width: { ideal: 640, max: 1280 },
+        height: { ideal: 480, max: 720 },
 
         // Cámara preferida ('user' = frontal, 'environment' = trasera)
         facingMode: 'user',
 
         // Framerate
         frameRate: { ideal: 30, min: 15 },
+
+        // Deshabilitar zoom automático de la cámara
+        advanced: [
+            { zoom: 1.0 },
+            { focusMode: 'continuous' },
+        ],
     },
 
     // ========================================
