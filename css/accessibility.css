@@ -1,0 +1,226 @@
+/* ========================================
+   SEÑAS CONNECT - Accesibilidad (Diseño Futurista)
+   ======================================== */
+
+/* ========================================
+   MODO ALTO CONTRASTE
+   ======================================== */
+body.high-contrast {
+    --bg-dark: #000000;
+    --bg-card: #0a0a0a;
+    --border: #ffffff;
+    --text-primary: #ffffff;
+    --text-secondary: #ffffff;
+    --accent: #ffff00;
+    --accent-dim: #cccc00;
+    --accent-glow: rgba(255, 255, 0, 0.5);
+    --success: #00ff00;
+    --danger: #ff0000;
+    --glass: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.3);
+}
+
+body.high-contrast .header {
+    border: 2px solid #ffffff;
+}
+
+body.high-contrast .panel {
+    border: 2px solid #ffffff;
+}
+
+body.high-contrast .btn-icon {
+    border: 2px solid #ffffff;
+}
+
+body.high-contrast .output-container {
+    border: 2px solid #ffffff;
+}
+
+body.high-contrast .output-text {
+    border: 2px solid #ffffff;
+    color: #ffff00;
+}
+
+body.high-contrast .voice-output-container {
+    border: 3px solid #ffff00;
+}
+
+body.high-contrast .btn-primary,
+body.high-contrast .btn-success {
+    background: #ffff00;
+    color: #000000;
+    border: 2px solid #ffffff;
+}
+
+body.high-contrast .btn-danger {
+    background: #ff0000;
+    color: #ffffff;
+    border: 2px solid #ffffff;
+}
+
+body.high-contrast .btn-secondary {
+    background: #000000;
+    color: #ffffff;
+    border: 2px solid #ffffff;
+}
+
+body.high-contrast .indicator {
+    border: 1px solid #ffffff;
+}
+
+body.high-contrast .modal-content {
+    border: 3px solid #ffffff;
+}
+
+body.high-contrast .select-camera {
+    border: 2px solid #ffffff;
+}
+
+body.high-contrast .divider-icon {
+    background: #ffff00;
+    color: #000000;
+}
+
+/* ========================================
+   TAMAÑOS DE FUENTE - Compactos para no romper layout
+   ======================================== */
+body.font-large {
+    font-size: 18px;
+}
+
+body.font-large .voice-text {
+    font-size: 2rem;
+}
+
+body.font-large .output-text {
+    font-size: 1.4rem;
+}
+
+body.font-large .btn {
+    font-size: 0.9rem;
+    padding: 10px 18px;
+}
+
+body.font-xlarge {
+    font-size: 20px;
+}
+
+body.font-xlarge .voice-text {
+    font-size: 2.4rem;
+}
+
+body.font-xlarge .output-text {
+    font-size: 1.6rem;
+}
+
+body.font-xlarge .btn {
+    font-size: 1rem;
+    padding: 12px 20px;
+}
+
+/* ========================================
+   FOCUS VISIBLE
+   ======================================== */
+*:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+}
+
+body.high-contrast *:focus-visible {
+    outline: 3px solid #ffff00;
+    outline-offset: 3px;
+}
+
+/* ========================================
+   MENSAJES DE ESTADO
+   ======================================== */
+.status-message {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    border: 1px solid var(--border);
+}
+
+.status-message.visible {
+    opacity: 1;
+}
+
+.status-message.success {
+    background: var(--success);
+    color: #000;
+    border-color: var(--success);
+}
+
+.status-message.error {
+    background: var(--danger);
+    color: #fff;
+    border-color: var(--danger);
+}
+
+body.high-contrast .status-message {
+    border: 2px solid #ffffff;
+}
+
+/* ========================================
+   REDUCIR MOVIMIENTO
+   ======================================== */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ========================================
+   PANTALLA COMPLETA
+   ======================================== */
+body.fullscreen-mode .header {
+    padding: 6px 12px;
+}
+
+body.fullscreen-mode .voice-text {
+    font-size: 2.2rem;
+}
+
+body.fullscreen-mode .output-text {
+    font-size: 1.5rem;
+}
+
+/* ========================================
+   MOBILE ADJUSTMENTS PARA ACCESIBILIDAD
+   ======================================== */
+@media (max-width: 768px) {
+    body.font-large .voice-text {
+        font-size: 1.6rem;
+    }
+
+    body.font-large .output-text {
+        font-size: 1.2rem;
+    }
+
+    body.font-xlarge .voice-text {
+        font-size: 1.8rem;
+    }
+
+    body.font-xlarge .output-text {
+        font-size: 1.4rem;
+    }
+
+    body.font-large .btn,
+    body.font-xlarge .btn {
+        padding: 8px 14px;
+        font-size: 0.8rem;
+    }
+}

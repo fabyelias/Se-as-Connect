@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Señas Connect - Comunicación Inclusiva</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/accessibility.css">
+    <!-- MediaPipe -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/hands.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1640029074/camera_utils.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.3.1620248257/drawing_utils.min.js" crossorigin="anonymous"></script>
+    <!-- TensorFlow.js para ML -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
+</head>
+<body>
+    <!-- Pantalla de carga inicial -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h1>Señas Connect</h1>
+            <p id="loading-status">Cargando componentes...</p>
+        </div>
+    </div>
+
+    <!-- Contenedor principal -->
+    <div id="app" class="app-container hidden">
+        <!-- Header con controles de accesibilidad -->
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">🤝</span>
+                <h1>Señas Connect</h1>
+            </div>
+            <div class="accessibility-controls">
+                <button id="btn-contrast" class="btn-icon" title="Alto contraste" aria-label="Cambiar contraste">
+                    <span class="icon">◐</span>
+                </button>
+                <button id="btn-font-size" class="btn-icon" title="Aumentar texto" aria-label="Aumentar tamaño de texto">
+                    <span class="icon">A+</span>
+                </button>
+                <button id="btn-fullscreen" class="btn-icon" title="Pantalla completa" aria-label="Pantalla completa">
+                    <span class="icon">⛶</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Área principal dividida en dos modos -->
+        <main class="main-content">
+            <!-- Panel izquierdo: Modo Señas (Persona sordomuda comunica) -->
+            <section class="panel panel-signs" id="panel-signs">
+                <div class="panel-header">
+                    <h2>👐 Lengua de Señas → Texto/Audio</h2>
+                    <p class="panel-subtitle">La persona sordomuda hace señas frente a la cámara</p>
+                </div>
+
+                <div class="camera-container">
+                    <video id="video-signs" class="camera-video" autoplay playsinline></video>
+                    <canvas id="canvas-signs" class="camera-canvas"></canvas>
+
+                    <!-- Indicadores de estado -->
+                    <div class="status-indicators">
+                        <div id="indicator-hands" class="indicator inactive">
+                            <span class="indicator-dot"></span>
+                            <span class="indicator-text">Manos detectadas</span>
+                        </div>
+                        <div id="indicator-gesture" class="indicator inactive">
+                            <span class="indicator-dot"></span>
+                            <span class="indicator-text">Gesto reconocido</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Texto reconocido -->
+                <div class="output-container">
+                    <div class="output-label">Mensaje detectado:</div>
+                    <div id="output-text" class="output-text" aria-live="polite">
+                        Esperando señas...
+                    </div>
+                    <div class="output-actions">
+                        <button id="btn-speak" class="btn btn-primary btn-large" disabled>
+                            🔊 Reproducir Audio
+                        </button>
+                        <button id="btn-clear-signs" class="btn btn-secondary">
+                            🗑️ Limpiar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Control de cámara -->
+                <div class="camera-controls">
+                    <button id="btn-start-camera" class="btn btn-success btn-xlarge">
+                        📷 Iniciar Cámara
+                    </button>
+                    <button id="btn-stop-camera" class="btn btn-danger btn-xlarge hidden">
+                        ⏹️ Detener Cámara
+                    </button>
+                    <select id="select-camera" class="select-camera" aria-label="Seleccionar cámara">
+                        <option value="">Seleccionar cámara...</option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- Divisor central -->
+            <div class="panel-divider">
+                <div class="divider-icon">⇄</div>
+            </div>
+
+            <!-- Panel derecho: Modo Voz (Oyente comunica) -->
+            <section class="panel panel-voice" id="panel-voice">
+                <div class="panel-header">
+                    <h2>🎤 Voz → Texto</h2>
+                    <p class="panel-subtitle">El oyente habla y el texto aparece en pantalla</p>
+                </div>
+
+                <!-- Área de texto grande para la persona sordomuda -->
+                <div class="voice-output-container">
+                    <div id="voice-text" class="voice-text" aria-live="polite">
+                        Presioná el botón y hablá...
+                    </div>
+                </div>
+
+                <!-- Indicador de grabación -->
+                <div id="recording-indicator" class="recording-indicator hidden">
+                    <div class="recording-pulse"></div>
+                    <span>Escuchando...</span>
+                </div>
+
+                <!-- Controles de voz -->
+                <div class="voice-controls">
+                    <button id="btn-start-voice" class="btn btn-success btn-xlarge">
+                        🎤 Comenzar a Escuchar
+                    </button>
+                    <button id="btn-stop-voice" class="btn btn-danger btn-xlarge hidden">
+                        ⏹️ Dejar de Escuchar
+                    </button>
+                    <button id="btn-clear-voice" class="btn btn-secondary">
+                        🗑️ Limpiar Texto
+                    </button>
+                </div>
+
+                <!-- Historial de mensajes -->
+                <div class="message-history">
+                    <h3>Historial de conversación:</h3>
+                    <div id="history-container" class="history-container">
+                        <!-- Los mensajes se agregan dinámicamente -->
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer con información -->
+        <footer class="footer">
+            <p>Señas Connect v1.0 - Comunicación Inclusiva para Todos</p>
+            <p class="footer-note">Compatible con computadoras y dispositivos móviles</p>
+        </footer>
+    </div>
+
+    <!-- Modal de instrucciones -->
+    <div id="modal-instructions" class="modal">
+        <div class="modal-content">
+            <h2>Bienvenido a Señas Connect</h2>
+            <div class="instructions">
+                <div class="instruction-step">
+                    <span class="step-number">1</span>
+                    <div class="step-content">
+                        <h3>Para personas sordomudas</h3>
+                        <p>Hacé señas frente a la cámara. La app convertirá tus señas en texto y audio.</p>
+                    </div>
+                </div>
+                <div class="instruction-step">
+                    <span class="step-number">2</span>
+                    <div class="step-content">
+                        <h3>Para personas oyentes</h3>
+                        <p>Presioná el botón del micrófono y hablá. Tu mensaje aparecerá en texto grande.</p>
+                    </div>
+                </div>
+                <div class="instruction-step">
+                    <span class="step-number">3</span>
+                    <div class="step-content">
+                        <h3>Accesibilidad</h3>
+                        <p>Usá los botones de la esquina superior derecha para ajustar contraste y tamaño de texto.</p>
+                    </div>
+                </div>
+            </div>
+            <button id="btn-close-modal" class="btn btn-primary btn-large">
+                Entendido, ¡Comenzar!
+            </button>
+        </div>
+    </div>
+
+    <!-- Scripts de la aplicación -->
+    <script src="js/config.js"></script>
+    <script src="js/sign-dictionary.js"></script>
+    <script src="js/hand-detector.js"></script>
+    <script src="js/sign-recognizer.js"></script>
+    <script src="js/speech-services.js"></script>
+    <script src="js/accessibility.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

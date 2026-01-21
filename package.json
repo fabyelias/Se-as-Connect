@@ -1,0 +1,38 @@
+{
+  "name": "senas-connect",
+  "version": "1.0.0",
+  "description": "Aplicación de comunicación inclusiva para personas sordomudas y oyentes mediante reconocimiento de lengua de señas",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-server -p 8080 -c-1 --cors",
+    "start:python": "python server.py",
+    "backend": "cd backend && python main.py"
+  },
+  "keywords": [
+    "sign-language",
+    "accessibility",
+    "inclusive",
+    "mediapipe",
+    "speech-recognition",
+    "text-to-speech",
+    "LSA",
+    "lengua-de-senas"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "bugs": {
+    "url": ""
+  },
+  "homepage": ""
+}
