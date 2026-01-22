@@ -85,37 +85,59 @@ class HandDetector {
         try {
             this.log('Iniciando cámara...');
 
-            // Configuración de la cámara - optimizada para mejor encuadre
-            const constraints = {
-                video: {
-                    width: CONFIG.camera.width,
-                    height: CONFIG.camera.height,
-                    frameRate: CONFIG.camera.frameRate,
-                    // Evitar zoom automático
-                    resizeMode: 'none',
+            let stream = null;
+
+            // Intentar diferentes configuraciones de cámara (de más específica a más simple)
+            const constraintsList = [
+                // Intento 1: Configuración ideal con deviceId o facingMode
+                {
+                    video: {
+                        ...(deviceId ? { deviceId: { exact: deviceId } } : { facingMode: CONFIG.camera.facingMode }),
+                        width: { ideal: 640 },
+                        height: { ideal: 480 },
+                    },
                 },
-            };
+                // Intento 2: Solo facingMode para móviles
+                {
+                    video: {
+                        facingMode: 'user',
+                        width: { ideal: 480 },
+                        height: { ideal: 640 },
+                    },
+                },
+                // Intento 3: Cámara trasera para móviles
+                {
+                    video: {
+                        facingMode: 'environment',
+                    },
+                },
+                // Intento 4: Configuración mínima (cualquier cámara)
+                {
+                    video: true,
+                },
+            ];
 
-            // Si hay un deviceId específico, usarlo
-            if (deviceId) {
-                constraints.video.deviceId = { exact: deviceId };
-            } else {
-                constraints.video.facingMode = CONFIG.camera.facingMode;
+            // Probar cada configuración hasta que una funcione
+            for (let i = 0; i < constraintsList.length; i++) {
+                try {
+                    this.log(`Intentando configuración de cámara ${i + 1}...`);
+                    stream = await navigator.mediaDevices.getUserMedia(constraintsList[i]);
+                    this.log(`Configuración ${i + 1} exitosa`);
+                    break;
+                } catch (err) {
+                    this.log(`Configuración ${i + 1} falló: ${err.message}`);
+                    if (i === constraintsList.length - 1) {
+                        throw err; // Si todas fallan, lanzar el último error
+                    }
+                }
             }
 
-            // Intentar deshabilitar zoom si la cámara lo soporta
-            if (CONFIG.camera.advanced) {
-                constraints.video.advanced = CONFIG.camera.advanced;
-            }
-
-            // Obtener stream de video
-            const stream = await navigator.mediaDevices.getUserMedia(constraints);
             this.videoElement.srcObject = stream;
 
             // Intentar resetear zoom a 1x si la cámara lo soporta
             try {
                 const track = stream.getVideoTracks()[0];
-                const capabilities = track.getCapabilities();
+                const capabilities = track.getCapabilities ? track.getCapabilities() : {};
                 if (capabilities.zoom) {
                     await track.applyConstraints({
                         advanced: [{ zoom: capabilities.zoom.min }],
@@ -127,10 +149,21 @@ class HandDetector {
             }
 
             // Esperar a que el video esté listo
-            await new Promise((resolve) => {
+            await new Promise((resolve, reject) => {
+                const timeout = setTimeout(() => {
+                    reject(new Error('Timeout esperando video'));
+                }, 10000);
+
                 this.videoElement.onloadedmetadata = () => {
-                    this.videoElement.play();
-                    resolve();
+                    clearTimeout(timeout);
+                    this.videoElement.play()
+                        .then(resolve)
+                        .catch(reject);
+                };
+
+                this.videoElement.onerror = (e) => {
+                    clearTimeout(timeout);
+                    reject(new Error('Error cargando video'));
                 };
             });
 

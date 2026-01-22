@@ -109,6 +109,10 @@ class SenasConnectApp {
             // Contenedor principal
             app: document.getElementById('app'),
 
+            // Banner de desbloqueo de audio
+            audioUnlockBanner: document.getElementById('audio-unlock-banner'),
+            btnUnlockAudio: document.getElementById('btn-unlock-audio'),
+
             // Panel de señas
             videoSigns: document.getElementById('video-signs'),
             canvasSigns: document.getElementById('canvas-signs'),
@@ -258,6 +262,35 @@ class SenasConnectApp {
                 this.hideInstructions();
             }
         });
+
+        // === Desbloqueo de Audio en Móviles ===
+        if (this.elements.btnUnlockAudio) {
+            this.elements.btnUnlockAudio.addEventListener('click', () => {
+                this.unlockAudioForMobile();
+            });
+        }
+    }
+
+    /**
+     * Muestra el banner de desbloqueo de audio en móviles
+     */
+    showAudioUnlockBanner() {
+        if (this.modules.tts && this.modules.tts.needsUnlock()) {
+            this.elements.audioUnlockBanner.classList.remove('hidden');
+            this.log('Mostrando banner de desbloqueo de audio para móvil');
+        }
+    }
+
+    /**
+     * Desbloquea el audio en móviles
+     */
+    async unlockAudioForMobile() {
+        if (this.modules.tts) {
+            await this.modules.tts.unlockAudio();
+            this.elements.audioUnlockBanner.classList.add('hidden');
+            this.modules.accessibility.showStatus('Audio activado', 'success');
+            this.log('Audio desbloqueado exitosamente');
+        }
     }
 
     /**
@@ -291,7 +324,15 @@ class SenasConnectApp {
     async startCamera() {
         if (this.state.cameraActive) return;
 
+        // Aprovechar esta interacción para desbloquear audio en móviles
+        if (this.modules.tts && this.modules.tts.needsUnlock()) {
+            this.modules.tts.unlockAudio().then(() => {
+                this.log('Audio desbloqueado al iniciar cámara');
+            });
+        }
+
         try {
+            this.modules.accessibility.showStatus('Iniciando cámara...', 'info');
             const selectedCamera = this.elements.selectCamera.value || null;
             await this.modules.handDetector.start(selectedCamera);
 
@@ -303,13 +344,31 @@ class SenasConnectApp {
             this.log('Cámara iniciada');
         } catch (error) {
             console.error('[App] Error iniciando cámara:', error);
-            this.modules.accessibility.showStatus('Error al iniciar cámara', 'error');
 
-            if (error.name === 'NotAllowedError') {
+            let errorMessage = 'Error al iniciar cámara';
+
+            if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+                errorMessage = 'Permiso de cámara denegado';
                 alert(
-                    'Se necesita permiso para acceder a la cámara.\n\nPor favor, permite el acceso a la cámara en tu navegador.'
+                    'Se necesita permiso para acceder a la cámara.\n\nPor favor, permite el acceso a la cámara en la configuración de tu navegador.'
                 );
+            } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+                errorMessage = 'No se encontró ninguna cámara';
+                alert('No se detectó ninguna cámara en este dispositivo.');
+            } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
+                errorMessage = 'La cámara está en uso';
+                alert('La cámara está siendo usada por otra aplicación. Cerrá otras apps que usen la cámara e intentá de nuevo.');
+            } else if (error.name === 'OverconstrainedError') {
+                errorMessage = 'Cámara no compatible';
+                alert('Tu cámara no es compatible con la configuración requerida. Intentá con otra cámara.');
+            } else if (error.message && error.message.includes('Timeout')) {
+                errorMessage = 'Timeout de cámara';
+                alert('La cámara tardó mucho en responder. Intentá de nuevo.');
+            } else {
+                alert(`Error al iniciar la cámara: ${error.message || 'Error desconocido'}`);
             }
+
+            this.modules.accessibility.showStatus(errorMessage, 'error');
         }
     }
 
@@ -367,7 +426,13 @@ class SenasConnectApp {
 
         // Auto-hablar si está configurado
         if (CONFIG.tts.autoSpeak) {
-            this.speakCurrentText();
+            // Verificar si necesita desbloquear audio en móvil
+            if (this.modules.tts && this.modules.tts.needsUnlock()) {
+                // Mostrar banner para que el usuario desbloquee manualmente
+                this.showAudioUnlockBanner();
+            } else {
+                this.speakCurrentText();
+            }
         }
 
         this.log(`Gesto reconocido: ${gesture.name} -> "${text}" (${(confidence * 100).toFixed(0)}%)`);
@@ -537,6 +602,13 @@ class SenasConnectApp {
         this.elements.modal.classList.add('hidden');
         // Devolver foco al primer botón de acción
         this.elements.btnStartCamera.focus();
+
+        // Aprovechar la interacción para desbloquear audio en móviles
+        if (this.modules.tts && this.modules.tts.needsUnlock()) {
+            this.modules.tts.unlockAudio().then(() => {
+                this.log('Audio desbloqueado al cerrar modal');
+            });
+        }
     }
 
     showError(message) {

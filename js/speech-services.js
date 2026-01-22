@@ -19,8 +19,54 @@ class TextToSpeech {
         this.onStart = null;
         this.onEnd = null;
         this.onError = null;
+        this.audioUnlocked = false; // Para móviles: indica si el audio fue desbloqueado
 
         this.init();
+    }
+
+    /**
+     * Detecta si estamos en un dispositivo móvil
+     */
+    isMobile() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+               (navigator.maxTouchPoints && navigator.maxTouchPoints > 2);
+    }
+
+    /**
+     * Desbloquea el audio en móviles (debe llamarse desde un evento de usuario)
+     */
+    unlockAudio() {
+        if (this.audioUnlocked) return Promise.resolve(true);
+
+        return new Promise((resolve) => {
+            // Crear un utterance silencioso para desbloquear
+            const utterance = new SpeechSynthesisUtterance('');
+            utterance.volume = 0;
+            utterance.onend = () => {
+                this.audioUnlocked = true;
+                this.log('Audio desbloqueado para móvil');
+                resolve(true);
+            };
+            utterance.onerror = () => {
+                // Incluso si hay error, marcar como intentado
+                this.audioUnlocked = true;
+                resolve(true);
+            };
+            this.synth.speak(utterance);
+
+            // Fallback si no hay evento
+            setTimeout(() => {
+                this.audioUnlocked = true;
+                resolve(true);
+            }, 500);
+        });
+    }
+
+    /**
+     * Verifica si el audio necesita ser desbloqueado
+     */
+    needsUnlock() {
+        return this.isMobile() && !this.audioUnlocked;
     }
 
     /**

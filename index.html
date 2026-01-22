@@ -23,6 +23,16 @@
         </div>
     </div>
 
+    <!-- Banner para desbloquear audio en móviles -->
+    <div id="audio-unlock-banner" class="audio-unlock-banner hidden">
+        <div class="audio-unlock-content">
+            <span>🔇 Audio desactivado</span>
+            <button id="btn-unlock-audio" class="btn btn-warning">
+                🔊 Tocar para activar audio
+            </button>
+        </div>
+    </div>
+
     <!-- Contenedor principal -->
     <div id="app" class="app-container hidden">
         <!-- Header con controles de accesibilidad -->
@@ -54,7 +64,7 @@
                 </div>
 
                 <div class="camera-container">
-                    <video id="video-signs" class="camera-video" autoplay playsinline></video>
+                    <video id="video-signs" class="camera-video" autoplay playsinline muted webkit-playsinline></video>
                     <canvas id="canvas-signs" class="camera-canvas"></canvas>
 
                     <!-- Indicadores de estado -->
