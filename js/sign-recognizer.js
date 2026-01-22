@@ -13,6 +13,10 @@ class SignRecognizer {
         this.lastRecognizedGesture = null;
         this.lastRecognitionTime = 0;
 
+        // Sistema de frames consecutivos para confirmar gestos
+        this.consecutiveFrames = 0;
+        this.lastDetectedGestureKey = null;
+
         // Buffer para detección de secuencias
         this.gestureSequence = [];
         this.sequenceStartTime = 0;
@@ -341,37 +345,52 @@ class SignRecognizer {
      */
     handleGestureDetected(gesture, hand) {
         const now = Date.now();
+        const requiredFrames = CONFIG.signRecognition.requiredConsecutiveFrames || 8;
 
-        // Verificar si es el mismo gesto que antes
-        if (this.currentGesture && this.currentGesture.key === gesture.key) {
-            // Mismo gesto, verificar tiempo de hold
-            const holdTime = now - this.gestureStartTime;
-
-            if (holdTime >= CONFIG.signRecognition.minGestureHoldTime) {
-                // Verificar cooldown para evitar repetición
-                if (
-                    !this.lastRecognizedGesture ||
-                    this.lastRecognizedGesture.key !== gesture.key ||
-                    now - this.lastRecognitionTime > CONFIG.signRecognition.gestureCooldown
-                ) {
-                    // ¡Gesto confirmado!
-                    this.confirmGesture(gesture, hand);
-                    return gesture;
-                }
-            }
+        // Verificar si es el mismo gesto que el frame anterior
+        if (this.lastDetectedGestureKey === gesture.key) {
+            this.consecutiveFrames++;
         } else {
-            // Nuevo gesto potencial
-            this.currentGesture = gesture;
+            // Gesto diferente, resetear contador
+            this.consecutiveFrames = 1;
+            this.lastDetectedGestureKey = gesture.key;
             this.gestureStartTime = now;
 
             if (this.onGestureStart) {
                 this.onGestureStart(gesture);
             }
 
-            this.log(`Gesto potencial: ${gesture.name} (${(gesture.confidence * 100).toFixed(0)}%)`);
+            this.log(`Gesto potencial: ${gesture.name} (${(gesture.confidence * 100).toFixed(0)}%) - Frame 1/${requiredFrames}`);
+            return null;
         }
 
-        return null;
+        // Verificar si tenemos suficientes frames consecutivos
+        if (this.consecutiveFrames < requiredFrames) {
+            this.log(`Gesto ${gesture.name}: Frame ${this.consecutiveFrames}/${requiredFrames}`);
+            return null;
+        }
+
+        // Verificar tiempo mínimo de hold
+        const holdTime = now - this.gestureStartTime;
+        if (holdTime < CONFIG.signRecognition.minGestureHoldTime) {
+            return null;
+        }
+
+        // Verificar cooldown para evitar repetición del mismo gesto
+        if (
+            this.lastRecognizedGesture &&
+            this.lastRecognizedGesture.key === gesture.key &&
+            now - this.lastRecognitionTime < CONFIG.signRecognition.gestureCooldown
+        ) {
+            return null;
+        }
+
+        // ¡Gesto confirmado! Resetear para el próximo
+        this.consecutiveFrames = 0;
+        this.lastDetectedGestureKey = null;
+        this.currentGesture = gesture;
+        this.confirmGesture(gesture, hand);
+        return gesture;
     }
 
     /**
@@ -419,6 +438,10 @@ class SignRecognizer {
      * Maneja cuando no hay manos detectadas
      */
     handleNoHands() {
+        // Resetear todo el estado de detección
+        this.consecutiveFrames = 0;
+        this.lastDetectedGestureKey = null;
+
         if (this.currentGesture) {
             if (this.onGestureEnd) {
                 this.onGestureEnd(this.currentGesture);
@@ -431,6 +454,10 @@ class SignRecognizer {
      * Maneja cuando no se reconoce ningún gesto
      */
     handleNoGesture() {
+        // Resetear contador de frames consecutivos
+        this.consecutiveFrames = 0;
+        this.lastDetectedGestureKey = null;
+
         if (this.currentGesture) {
             // El gesto anterior terminó
             if (this.onGestureEnd) {
@@ -526,6 +553,8 @@ class SignRecognizer {
         this.gestureStartTime = 0;
         this.lastRecognizedGesture = null;
         this.lastRecognitionTime = 0;
+        this.consecutiveFrames = 0;
+        this.lastDetectedGestureKey = null;
         this.gestureSequence = [];
         this.sequenceStartTime = 0;
     }

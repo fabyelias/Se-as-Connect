@@ -28,13 +28,17 @@ const CONFIG = {
     // ========================================
     signRecognition: {
         // Confianza mínima para aceptar un gesto (0.0 - 1.0)
-        minConfidence: 0.75,
+        minConfidence: 0.85,
 
         // Tiempo mínimo que un gesto debe mantenerse (ms)
-        minGestureHoldTime: 500,
+        // Aumentado para evitar detecciones accidentales
+        minGestureHoldTime: 1200,
 
         // Tiempo entre reconocimientos del mismo gesto (ms)
-        gestureCooldown: 1000,
+        gestureCooldown: 2000,
+
+        // Cantidad de frames consecutivos con el mismo gesto para confirmar
+        requiredConsecutiveFrames: 8,
 
         // Habilitar detección de secuencias de gestos
         enableSequenceDetection: true,
