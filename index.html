@@ -24,14 +24,14 @@
     <div id="app" class="app-container hidden">
         <header class="app-header">
             <h1>SEÑAS CONNECT</h1>
-            <!-- Controles de accesibilidad eliminados -->
         </header>
 
         <!-- Área principal dividida en dos modos -->
-        <main class="main-content">
+        <main class="main-content" id="main-content">
             <!-- Panel izquierdo: Modo Señas (Comunicación por señas) -->
             <section class="panel panel-signs" id="panel-signs">
                 <div class="panel-header">
+                    <button id="btn-toggle-signs" class="btn-toggle-panel" aria-label="Minimizar panel de señas">_</button>
                     <h2>👐 Lengua de Señas → Texto/Audio</h2>
                     <p class="panel-subtitle">HAGA LAS SEÑAS</p>
                 </div>
@@ -88,6 +88,7 @@
             <!-- Panel derecho: Modo Voz (Persona oyente comunica) -->
             <section class="panel panel-voice" id="panel-voice">
                 <div class="panel-header">
+                    <button id="btn-toggle-voice" class="btn-toggle-panel" aria-label="Minimizar panel de voz">_</button>
                     <h2>🎤 Voz → Texto</h2>
                     <p class="panel-subtitle">EL OYENTE HABLA Y EL TEXTO APARECE EN PANTALLA</p>
                 </div>

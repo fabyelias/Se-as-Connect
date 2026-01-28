@@ -51,7 +51,6 @@ class SenasConnectApp {
             this.state.initialized = true;
             this.hideLoadingScreen();
             
-            // Iniciar en pantalla completa como solicitado
             this.requestFullscreen();
 
             if (CONFIG.ui.showInstructionsOnStart) {
@@ -79,9 +78,11 @@ class SenasConnectApp {
 
     cacheElements() {
         this.elements = {
+            // Elementos existentes
             loadingScreen: document.getElementById('loading-screen'),
             loadingStatus: document.getElementById('loading-status'),
             app: document.getElementById('app'),
+            mainContent: document.getElementById('main-content'), // Contenedor principal para toggle
             audioUnlockBanner: document.getElementById('audio-unlock-banner'),
             btnUnlockAudio: document.getElementById('btn-unlock-audio'),
             videoSigns: document.getElementById('video-signs'),
@@ -106,19 +107,22 @@ class SenasConnectApp {
             modal: document.getElementById('modal-instructions'),
             btnCloseModal: document.getElementById('btn-close-modal'),
             btnModalGotIt: document.getElementById('btn-modal-got-it'),
+            panelSigns: document.getElementById('panel-signs'), // Panel izquierdo
+            panelVoice: document.getElementById('panel-voice'), // Panel derecho
+
+            // Nuevos botones de toggle
+            btnToggleSigns: document.getElementById('btn-toggle-signs'),
+            btnToggleVoice: document.getElementById('btn-toggle-voice'),
         };
     }
 
     async initModules() {
         this.modules.accessibility = new AccessibilityManager();
-
         this.modules.handDetector = new HandDetector();
         this.modules.handDetector.setElements(this.elements.videoSigns, this.elements.canvasSigns);
         this.modules.handDetector.onResultsReceived((data) => this.handleHandDetection(data));
-
         this.modules.tts = new TextToSpeech();
         this.modules.stt = new SpeechToText();
-
         this.modules.stt.onResult = (data) => this.handleVoiceResult(data);
         this.modules.stt.onInterim = (data) => this.handleVoiceInterim(data);
         this.modules.stt.onStart = () => this.modules.accessibility.showRecording(true);
@@ -126,6 +130,7 @@ class SenasConnectApp {
     }
 
     setupEventListeners() {
+        // Event listeners existentes
         this.elements.btnStartCamera.addEventListener('click', () => this.startCamera());
         this.elements.btnStopCamera.addEventListener('click', () => this.stopCamera());
         this.elements.btnSpeak.addEventListener('click', () => this.speakCurrentText());
@@ -135,12 +140,10 @@ class SenasConnectApp {
                 this.modules.handDetector.switchCamera(e.target.value);
             }
         });
-
         this.elements.btnRecordSample.addEventListener('click', () => this.recordSample());
         this.elements.btnStartVoice.addEventListener('click', () => this.startVoiceRecognition());
         this.elements.btnStopVoice.addEventListener('click', () => this.stopVoiceRecognition());
         this.elements.btnClearVoice.addEventListener('click', () => this.clearVoiceOutput());
-
         this.elements.btnCloseModal.addEventListener('click', () => this.hideInstructions());
         this.elements.btnModalGotIt.addEventListener('click', () => this.hideInstructions());
         this.elements.modal.addEventListener('click', (e) => {
@@ -152,17 +155,85 @@ class SenasConnectApp {
                 this.hideInstructions();
             }
         });
-
         if (this.elements.btnUnlockAudio) {
             this.elements.btnUnlockAudio.addEventListener('click', () => this.unlockAudioForMobile());
         }
+
+        // --- CORRECTED: Listeners para minimizar/maximizar paneles ---
+        this.elements.btnToggleSigns.addEventListener('click', (event) => {
+            event.stopPropagation(); // Evita que el clic se propague al panel padre.
+            this.togglePanel('signs');
+        });
+        this.elements.btnToggleVoice.addEventListener('click', (event) => {
+            event.stopPropagation(); // Evita que el clic se propague al panel padre.
+            this.togglePanel('voice');
+        });
+        
+        // Listener para maximizar un panel minimizado al hacer clic en él
+        this.elements.panelSigns.addEventListener('click', () => {
+            if (this.elements.mainContent.classList.contains('left-minimized')) {
+                this.togglePanel('signs');
+            }
+        });
+        this.elements.panelVoice.addEventListener('click', () => {
+            if (this.elements.mainContent.classList.contains('right-minimized')) {
+                this.togglePanel('voice');
+            }
+        });
+    }
+
+    togglePanel(panelToToggle) {
+        const main = this.elements.mainContent;
+        const signsPanel = this.elements.panelSigns;
+        const voicePanel = this.elements.panelVoice;
+
+        const isSignsMinimized = main.classList.contains('left-minimized');
+        const isVoiceMinimized = main.classList.contains('right-minimized');
+
+        if (panelToToggle === 'signs') {
+            if (isSignsMinimized) { // Maximizar panel de señas
+                main.classList.remove('left-minimized');
+                signsPanel.classList.remove('minimized');
+            } else { // Minimizar panel de señas
+                main.classList.add('left-minimized');
+                signsPanel.classList.add('minimized');
+                // Asegurarse de que el otro panel esté maximizado
+                main.classList.remove('right-minimized');
+                voicePanel.classList.remove('minimized');
+            }
+        } else if (panelToToggle === 'voice') {
+            if (isVoiceMinimized) { // Maximizar panel de voz
+                main.classList.remove('right-minimized');
+                voicePanel.classList.remove('minimized');
+            } else { // Minimizar panel de voz
+                main.classList.add('right-minimized');
+                voicePanel.classList.add('minimized');
+                // Asegurarse de que el otro panel esté maximizado
+                main.classList.remove('left-minimized');
+                signsPanel.classList.remove('minimized');
+            }
+        }
+        
+        this.updateToggleButtons();
+        this.log(`Paneles actualizados. Izquierda minimizado: ${main.classList.contains('left-minimized')}, Derecha minimizado: ${main.classList.contains('right-minimized')}`);
     }
     
+    updateToggleButtons() {
+        const isSignsMinimized = this.elements.mainContent.classList.contains('left-minimized');
+        const isVoiceMinimized = this.elements.mainContent.classList.contains('right-minimized');
+        
+        this.elements.btnToggleSigns.textContent = isSignsMinimized ? '+' : '_';
+        this.elements.btnToggleSigns.setAttribute('aria-label', isSignsMinimized ? 'Maximizar panel de señas' : 'Minimizar panel de señas');
+        
+        this.elements.btnToggleVoice.textContent = isVoiceMinimized ? '+' : '_';
+        this.elements.btnToggleVoice.setAttribute('aria-label', isVoiceMinimized ? 'Maximizar panel de voz' : 'Minimizar panel de voz');
+    }
+
     requestFullscreen() {
-        const elem = document.documentElement;
         // La mayoría de navegadores modernos requieren que la petición de pantalla completa
         // sea iniciada por una acción del usuario (click, etc). 
         // No siempre funcionará al cargar la página, pero lo intentamos.
+        const elem = document.documentElement;
         if (elem.requestFullscreen) {
             elem.requestFullscreen().catch(err => {
                 this.log(`No se pudo entrar en pantalla completa automáticamente: ${err.message}`);
@@ -303,8 +374,6 @@ class SenasConnectApp {
     }
 
     async startVoiceRecognition() {
-        if (this.state.voiceActive) return;
-
         const hasPermission = await SpeechServices.requestMicrophonePermission();
         if (!hasPermission) {
             this.modules.accessibility.showStatus('Se necesita permiso de micrófono', 'error');
@@ -418,7 +487,6 @@ class SenasConnectApp {
         }
     }
 }
-
 
 document.addEventListener('DOMContentLoaded', () => {
     const app = new SenasConnectApp();

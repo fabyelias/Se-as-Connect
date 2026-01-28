@@ -1,93 +1,91 @@
 /**
- * SEÑAS CONNECT - Configuración Global
+ * SEÑAS CONNECT - Archivo de Configuración Global
  *
- * Este archivo contiene todas las configuraciones de la aplicación.
- * Modifica estos valores para ajustar el comportamiento.
+ * Este archivo centraliza todas las configuraciones ajustables de la aplicación
+ * para facilitar el mantenimiento y la personalización.
  */
 
 const CONFIG = {
+
     // ========================================
-    // CONFIGURACIÓN DE MEDIAPIPE HANDS
+    // CONFIGURACIÓN GENERAL
     // ========================================
-    mediapipe: {
-        // Número máximo de manos a detectar (1 o 2)
-        maxNumHands: 2,
+    debug: {
+        // Activa los logs en la consola para depuración
+        enableLogs: true,
+    },
 
-        // Modelo de detección: 'full' (más preciso) o 'lite' (más rápido)
-        modelComplexity: 1,
-
-        // Confianza mínima para detectar una mano (0.0 - 1.0)
-        minDetectionConfidence: 0.7,
-
-        // Confianza mínima para seguir una mano detectada (0.0 - 1.0)
-        minTrackingConfidence: 0.5,
+    ui: {
+        // Muestra las instrucciones al iniciar la aplicación
+        showInstructionsOnStart: true,
     },
 
     // ========================================
-    // CONFIGURACIÓN DE RECONOCIMIENTO DE SEÑAS
+    // CONFIGURACIÓN DEL DETECTOR DE MANOS (MediaPipe)
+    // ========================================
+    handModel: {
+        // Número máximo de manos a detectar
+        maxNumHands: 1,
+
+        // Precisión del modelo (0.0 a 1.0)
+        // Valores más altos son más precisos pero más lentos.
+        minDetectionConfidence: 0.7, // Confianza mínima para detectar una mano
+        minTrackingConfidence: 0.7,  // Confianza mínima para seguir la mano
+
+        // Ruta al modelo de MediaPipe Hands
+        modelPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1635986972/',
+    },
+
+    // ========================================
+    // CONFIGURACIÓN DEL DICCIONARIO DE SEÑAS
     // ========================================
     signRecognition: {
-        // Confianza mínima para aceptar un gesto (0.0 - 1.0)
-        minConfidence: 0.85,
+        // Intervalo en milisegundos para comprobar si una seña se mantiene estable
+        stabilityThreshold: 150,
 
-        // Tiempo mínimo que un gesto debe mantenerse (ms)
-        // Aumentado para evitar detecciones accidentales
-        minGestureHoldTime: 1200,
-
-        // Tiempo entre reconocimientos del mismo gesto (ms)
-        gestureCooldown: 2000,
-
-        // Cantidad de frames consecutivos con el mismo gesto para confirmar
-        requiredConsecutiveFrames: 8,
-
-        // Habilitar detección de secuencias de gestos
-        enableSequenceDetection: true,
-
-        // Máximo de gestos en una secuencia
-        maxSequenceLength: 5,
-
-        // Tiempo máximo entre gestos de una secuencia (ms)
-        sequenceTimeout: 2000,
+        // Puntuación mínima de similitud para considerar una coincidencia (0.0 a 1.0)
+        minSimilarityScore: 0.92, // Bastante estricto para evitar falsos positivos
     },
 
     // ========================================
-    // CONFIGURACIÓN DE TEXT-TO-SPEECH
+    // CONFIGURACIÓN DE TEXT-TO-SPEECH (TTS)
     // ========================================
     tts: {
-        // Idioma por defecto
-        language: 'es-AR',
-
-        // Idiomas alternativos (fallback)
-        fallbackLanguages: ['es-ES', 'es-MX', 'es'],
-
-        // Velocidad de habla (0.1 - 10)
-        rate: 0.9,
-
-        // Tono de voz (0 - 2)
-        pitch: 1.0,
-
-        // Volumen (0 - 1)
-        volume: 1.0,
-
-        // Reproducir automáticamente al detectar gesto
+        // ¿Reproducir el audio automáticamente al detectar una seña?
         autoSpeak: true,
+
+        // Voz a utilizar (depende del navegador y sistema operativo)
+        // Para ver las voces disponibles, usar: speechSynthesis.getVoices()
+        voice: 'Google español', // Intenta usar una voz común
+
+        // Tono y velocidad de la voz
+        pitch: 1,
+        rate: 1,
+    },
+    
+    // ========================================
+    // CONFIGURACIÓN DEL HISTORIAL DE MENSAJES
+    // ========================================
+    history: {
+        // Número máximo de mensajes a mostrar en el historial
+        maxMessages: 50,
+
+        // ¿Mostrar la hora en cada mensaje?
+        showTimestamp: true,
     },
 
     // ========================================
-    // CONFIGURACIÓN DE SPEECH-TO-TEXT
+    // CONFIGURACIÓN DE SPEECH-TO-TEXT (STT)
     // ========================================
     stt: {
-        // Idioma de reconocimiento
-        language: 'es-AR',
+        // Idioma para el reconocimiento de voz (formato BCP 47)
+        lang: 'es-ES',
 
-        // Idiomas alternativos
-        fallbackLanguages: ['es-ES', 'es-MX'],
-
-        // Modo continuo (sigue escuchando)
-        continuous: true,
-
-        // Resultados intermedios (en tiempo real)
+        // ¿Mostrar resultados intermedios mientras se habla?
         interimResults: true,
+
+        // ¿Continuar escuchando indefinidamente?
+        continuous: true,
 
         // Tiempo máximo de silencio antes de pausar (ms)
         silenceTimeout: 3000,
@@ -97,9 +95,9 @@ const CONFIG = {
     // CONFIGURACIÓN DE CÁMARA
     // ========================================
     camera: {
-        // Resolución preferida (más baja para evitar zoom digital)
-        width: { ideal: 640, max: 1280 },
-        height: { ideal: 480, max: 720 },
+        // Resolución solicitada. Usamos una resolución HD estándar para mayor compatibilidad.
+        width: { ideal: 1280 },
+        height: { ideal: 720 },
 
         // Cámara preferida ('user' = frontal, 'environment' = trasera)
         facingMode: 'user',
@@ -107,7 +105,7 @@ const CONFIG = {
         // Framerate
         frameRate: { ideal: 30, min: 15 },
 
-        // Deshabilitar zoom automático de la cámara
+        // Opciones avanzadas para controlar el comportamiento de la cámara
         advanced: [
             { zoom: 1.0 },
             { focusMode: 'continuous' },
@@ -115,115 +113,18 @@ const CONFIG = {
     },
 
     // ========================================
-    // CONFIGURACIÓN DE UI/ACCESIBILIDAD
+    // CONFIGURACIÓN DE ACCESIBILIDAD
     // ========================================
-    ui: {
-        // Mostrar modal de instrucciones al inicio
-        showInstructionsOnStart: false,
-
-        // Guardar preferencias de accesibilidad en localStorage
-        savePreferences: true,
-
-        // Tiempo para mostrar mensajes de estado (ms)
+    accessibility: {
+        // Duración de los mensajes de estado en pantalla (ms)
         statusMessageDuration: 3000,
-
-        // Animaciones habilitadas
-        enableAnimations: true,
-
-        // Vibración en móviles (si está disponible)
-        enableVibration: true,
     },
 
     // ========================================
-    // CONFIGURACIÓN DE HISTORIAL
+    // CONFIGURACIÓN DEL ENTRENADOR (Futuro)
     // ========================================
-    history: {
-        // Máximo de mensajes en historial
-        maxMessages: 50,
-
-        // Guardar historial en localStorage
-        persistHistory: false,
-
-        // Mostrar timestamp
-        showTimestamp: true,
-    },
-
-    // ========================================
-    // CONFIGURACIÓN DE DEBUG
-    // ========================================
-    debug: {
-        // Mostrar logs en consola
-        enableLogs: true,
-
-        // Mostrar landmarks de manos en canvas
-        showLandmarks: true,
-
-        // Mostrar conexiones entre landmarks
-        showConnections: true,
-
-        // Mostrar FPS
-        showFPS: false,
-
-        // Mostrar confianza del gesto
-        showConfidence: true,
-    },
-
-    // ========================================
-    // ESTILOS DE DIBUJO (CANVAS)
-    // ========================================
-    drawing: {
-        // Color de las conexiones de la mano
-        connectionColor: '#00FF00',
-        connectionColorHighContrast: '#FFFF00',
-
-        // Color de los puntos (landmarks)
-        landmarkColor: '#FF0000',
-        landmarkColorHighContrast: '#00FF00',
-
-        // Grosor de las líneas
-        lineWidth: 3,
-
-        // Tamaño de los puntos
-        pointRadius: 5,
+    trainer: {
+        // Almacenamiento de las señas personalizadas
+        storageKey: 'senas-connect-custom-signs',
     },
 };
-
-// Función para obtener configuración con soporte de override
-function getConfig(path, defaultValue = null) {
-    const keys = path.split('.');
-    let value = CONFIG;
-
-    for (const key of keys) {
-        if (value && typeof value === 'object' && key in value) {
-            value = value[key];
-        } else {
-            return defaultValue;
-        }
-    }
-
-    return value;
-}
-
-// Función para actualizar configuración en runtime
-function setConfig(path, newValue) {
-    const keys = path.split('.');
-    let obj = CONFIG;
-
-    for (let i = 0; i < keys.length - 1; i++) {
-        if (!(keys[i] in obj)) {
-            obj[keys[i]] = {};
-        }
-        obj = obj[keys[i]];
-    }
-
-    obj[keys[keys.length - 1]] = newValue;
-
-    if (CONFIG.debug.enableLogs) {
-        console.log(`[Config] ${path} = ${JSON.stringify(newValue)}`);
-    }
-}
-
-// Log inicial
-if (CONFIG.debug.enableLogs) {
-    console.log('[Config] Configuración cargada:', CONFIG);
-}
