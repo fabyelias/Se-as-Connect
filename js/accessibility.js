@@ -126,23 +126,19 @@ class AccessibilityManager {
      * Configura los event listeners para los controles
      */
     setupEventListeners() {
-        // Botón de alto contraste
-        const btnContrast = document.getElementById('btn-contrast');
-        if (btnContrast) {
-            btnContrast.addEventListener('click', () => this.toggleHighContrast());
-        }
-
-        // Botón de tamaño de fuente
-        const btnFontSize = document.getElementById('btn-font-size');
-        if (btnFontSize) {
-            btnFontSize.addEventListener('click', () => this.cycleFontSize());
-        }
-
-        // Botón de pantalla completa
-        const btnFullscreen = document.getElementById('btn-fullscreen');
-        if (btnFullscreen) {
-            btnFullscreen.addEventListener('click', () => this.toggleFullscreen());
-        }
+        // Botones eliminados, ya no se necesitan listeners
+        // const btnContrast = document.getElementById('btn-contrast');
+        // if (btnContrast) {
+        //     btnContrast.addEventListener('click', () => this.toggleHighContrast());
+        // }
+        // const btnFontSize = document.getElementById('btn-font-size');
+        // if (btnFontSize) {
+        //     btnFontSize.addEventListener('click', () => this.cycleFontSize());
+        // }
+        // const btnFullscreen = document.getElementById('btn-fullscreen');
+        // if (btnFullscreen) {
+        //     btnFullscreen.addEventListener('click', () => this.toggleFullscreen());
+        // }
 
         // Escuchar cambio de pantalla completa
         document.addEventListener('fullscreenchange', () => {
@@ -150,7 +146,7 @@ class AccessibilityManager {
             this.applyState();
         });
 
-        // Atajos de teclado
+        // Atajos de teclado (los mantenemos por si son útiles)
         document.addEventListener('keydown', (e) => this.handleKeyboard(e));
     }
 

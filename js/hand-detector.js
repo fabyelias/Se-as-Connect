@@ -77,7 +77,6 @@ class HandDetector {
         if (!this.isRunning || !this.camera) return;
         this.camera.stop();
         this.isRunning = false;
-        // Limpiar el canvas al detener
         if (this.canvasCtx) {
             this.canvasCtx.clearRect(0, 0, this.canvasElement.width, this.canvasElement.height);
         }
@@ -108,8 +107,6 @@ class HandDetector {
 
         this.canvasCtx.save();
         this.canvasCtx.clearRect(0, 0, this.canvasElement.width, this.canvasElement.height);
-
-        // DIBUJAR LA IMAGEN DEL VIDEO DE FONDO
         this.canvasCtx.drawImage(results.image, 0, 0, this.canvasElement.width, this.canvasElement.height);
 
         this.handsDetected = results.multiHandLandmarks && results.multiHandLandmarks.length > 0;
@@ -164,14 +161,16 @@ class HandDetector {
         this.canvasCtx.fillStyle = '#00FF00';
         this.canvasCtx.fillText(`FPS: ${this.fps}`, 10, 20);
     }
+    
+    // --- LÓGICA DE DETECCIÓN DE DEDOS CORREGIDA ---
 
     extractHandData(landmarks, handedness) {
         const fingerStates = {
             thumb: this.isThumbExtended(landmarks),
-            index: this.isFingerExtended(landmarks, 5, 6, 7, 8),
-            middle: this.isFingerExtended(landmarks, 9, 10, 11, 12),
-            ring: this.isFingerExtended(landmarks, 13, 14, 15, 16),
-            pinky: this.isFingerExtended(landmarks, 17, 18, 19, 20),
+            index: this.isFingerExtended(landmarks, 8, 6), // Tip, PIP
+            middle: this.isFingerExtended(landmarks, 12, 10),
+            ring: this.isFingerExtended(landmarks, 16, 14),
+            pinky: this.isFingerExtended(landmarks, 20, 18),
         };
         return {
             handedness: handedness.label,
@@ -182,20 +181,37 @@ class HandDetector {
         };
     }
 
-    isThumbExtended(landmarks) {
-        return this.distance3D(landmarks[4], landmarks[5]) > this.distance3D(landmarks[3], landmarks[5]);
-    }
-
-    isFingerExtended(landmarks, mcpIdx, pipIdx, dipIdx, tipIdx) {
+    isFingerExtended(landmarks, tipIdx, pipIdx) {
         const tip = landmarks[tipIdx];
         const pip = landmarks[pipIdx];
-        const mcp = landmarks[mcpIdx];
-        return tip.y < pip.y && pip.y < mcp.y;
+        const mcp = landmarks[pipIdx - 1]; // Joint before PIP is MCP
+        const wrist = landmarks[0];
+
+        // Un dedo está extendido si la punta está más lejos de la muñeca que la articulación PIP.
+        // Y la articulación PIP está más lejos que la articulación MCP.
+        // Esto es robusto a la rotación.
+        return this.distance3D(wrist, tip) > this.distance3D(wrist, pip) &&
+               this.distance3D(wrist, pip) > this.distance3D(wrist, mcp);
     }
 
+    isThumbExtended(landmarks) {
+        const tip = landmarks[4];
+        const ip = landmarks[3];
+        const mcp = landmarks[2];
+        const wrist = landmarks[0];
+
+        // El pulgar está extendido si la punta está más lejos de la muñeca que la articulación intermedia (IP).
+        // Y la articulación IP está más lejos que la articulación MCP.
+        return this.distance3D(wrist, tip) > this.distance3D(wrist, ip) &&
+               this.distance3D(wrist, ip) > this.distance3D(wrist, mcp);
+    }
+    
     distance3D(p1, p2) {
+        if (!p1 || !p2) return 0;
         return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2 + (p1.z - p2.z) ** 2);
     }
+    
+    // --- FIN DE LA LÓGICA CORREGIDA ---
 
     async getAvailableCameras() {
         try {

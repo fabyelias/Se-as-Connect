@@ -14,20 +14,22 @@
         <p id="loading-status">Cargando aplicación...</p>
     </div>
 
+    <!-- Banner para desbloquear audio en móviles -->
+    <div id="audio-unlock-banner" class="audio-unlock-banner hidden">
+        <p>Para escuchar la traducción, necesitamos que actives el audio.</p>
+        <button id="btn-unlock-audio" class="btn btn-primary">Activar Audio</button>
+    </div>
+
     <!-- Contenido principal de la aplicación -->
     <div id="app" class="app-container hidden">
         <header class="app-header">
             <h1>SEÑAS CONNECT</h1>
-            <div class="accessibility-controls">
-                <button id="btn-contrast" class="btn-icon" title="Alto Contraste (Alt+C)">Contraste</button>
-                <button id="btn-font-size" class="btn-icon" title="Aumentar Tamaño de Fuente (Alt+F)">Fuente</button>
-                <button id="btn-fullscreen" class="btn-icon" title="Pantalla Completa (Alt+Enter)">Completa</button>
-            </div>
+            <!-- Controles de accesibilidad eliminados -->
         </header>
 
         <!-- Área principal dividida en dos modos -->
         <main class="main-content">
-            <!-- Panel izquierdo: Modo Señas -->
+            <!-- Panel izquierdo: Modo Señas (Comunicación por señas) -->
             <section class="panel panel-signs" id="panel-signs">
                 <div class="panel-header">
                     <h2>👐 Lengua de Señas → Texto/Audio</h2>
@@ -37,50 +39,94 @@
                 <div class="camera-container">
                     <video id="video-signs" class="camera-video" autoplay playsinline muted webkit-playsinline></video>
                     <canvas id="canvas-signs" class="camera-canvas"></canvas>
+
+                    <!-- Indicadores de estado -->
+                    <div class="status-indicators">
+                        <div id="indicator-hands" class="indicator inactive">
+                            <span class="indicator-dot"></span>
+                            <span class="indicator-text">Manos detectadas</span>
+                        </div>
+                        <div id="indicator-gesture" class="indicator inactive">
+                            <span class="indicator-dot"></span>
+                            <span class="indicator-text">Gesto reconocido</span>
+                        </div>
+                    </div>
                 </div>
 
+                <!-- Salida del texto reconocido -->
                 <div class="output-container">
                     <p class="output-label">MENSAJE DETECTADO:</p>
                     <div id="output-text" class="output-text">Esperando señas...</div>
                 </div>
 
+                <!-- Controles del modo Señas -->
                 <div class="controls-group">
                     <button id="btn-speak" class="btn btn-primary" disabled>REPRODUCIR AUDIO</button>
                     <button id="btn-clear-signs" class="btn btn-secondary">LIMPIAR</button>
                 </div>
 
+                <!-- Controles de la cámara -->
                 <div class="camera-controls">
                     <button id="btn-start-camera" class="btn btn-primary">INICIAR CÁMARA</button>
                     <button id="btn-stop-camera" class="btn btn-danger hidden">DETENER CÁMARA</button>
                     <select id="select-camera" class="select-camera"></select>
                 </div>
 
+                <!-- Panel de Entrenamiento (OBLIGATORIO PARA APP.JS) -->
+                <div id="training-panel" class="training-panel hidden">
+                    <h3>Entrenamiento del Modelo</h3>
+                    <div class="input-group">
+                        <input type="text" id="input-sign-name" placeholder="Nombre de la seña">
+                        <button id="btn-record-sample" class="btn btn-primary">Grabar Muestra</button>
+                    </div>
+                </div>
             </section>
 
             <!-- Separador visual -->
             <div class="panel-separator"></div>
 
-            <!-- Panel derecho: Modo Voz -->
+            <!-- Panel derecho: Modo Voz (Persona oyente comunica) -->
             <section class="panel panel-voice" id="panel-voice">
                 <div class="panel-header">
                     <h2>🎤 Voz → Texto</h2>
+                    <p class="panel-subtitle">EL OYENTE HABLA Y EL TEXTO APARECE EN PANTALLA</p>
                 </div>
 
+                <!-- Área de visualización del texto por voz -->
                 <div id="voice-text-container" class="voice-text-container">
                     <p id="voice-text">Presioná el botón y hablá...</p>
                 </div>
 
+                <!-- Indicador de grabación -->
                 <div id="recording-indicator" class="recording-indicator hidden">
+                    <div class="recording-dot"></div>
                     <span>Grabando...</span>
                 </div>
 
+                <!-- Controles del modo Voz -->
                 <div class="controls-group">
                     <button id="btn-start-voice" class="btn btn-success">COMENZAR A ESCUCHAR</button>
                     <button id="btn-stop-voice" class="btn btn-danger hidden">DETENER</button>
                     <button id="btn-clear-voice" class="btn btn-secondary">LIMPIAR TEXTO</button>
                 </div>
+
+                <!-- Historial de conversación -->
+                <div class="history-container-wrapper">
+                    <h3>Historial de Conversación:</h3>
+                    <div id="history-container" class="history-container"></div>
+                </div>
             </section>
         </main>
+    </div>
+
+    <!-- Modal de Instrucciones (OBLIGATORIO PARA APP.JS) -->
+    <div id="modal-instructions" class="modal hidden">
+        <div class="modal-content">
+            <span id="btn-close-modal" class="close-button">&times;</span>
+            <h2>¡Bienvenido a Señas Connect!</h2>
+            <p>Esta aplicación facilita la comunicación entre personas con capacidad auditiva reducida y oyentes.</p>
+            <button id="btn-modal-got-it" class="btn btn-primary">Entendido</button>
+        </div>
     </div>
 
     <!-- Scripts -->
@@ -90,7 +136,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.min.js" crossorigin="anonymous"></script>
 
     <script src="js/config.js"></script>
-    <script src="js/sign-dictionary.js"></script> <!-- RUTA CORREGIDA -->
+    <script src="js/sign-dictionary.js"></script>
     <script src="js/speech-services.js"></script>
     <script src="js/hand-detector.js"></script>
     <script src="js/accessibility.js"></script>

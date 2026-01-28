@@ -50,6 +50,9 @@ class SenasConnectApp {
 
             this.state.initialized = true;
             this.hideLoadingScreen();
+            
+            // Iniciar en pantalla completa como solicitado
+            this.requestFullscreen();
 
             if (CONFIG.ui.showInstructionsOnStart) {
                 this.showInstructions();
@@ -152,6 +155,24 @@ class SenasConnectApp {
 
         if (this.elements.btnUnlockAudio) {
             this.elements.btnUnlockAudio.addEventListener('click', () => this.unlockAudioForMobile());
+        }
+    }
+    
+    requestFullscreen() {
+        const elem = document.documentElement;
+        // La mayoría de navegadores modernos requieren que la petición de pantalla completa
+        // sea iniciada por una acción del usuario (click, etc). 
+        // No siempre funcionará al cargar la página, pero lo intentamos.
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen().catch(err => {
+                this.log(`No se pudo entrar en pantalla completa automáticamente: ${err.message}`);
+            });
+        } else if (elem.mozRequestFullScreen) { // Firefox
+            elem.mozRequestFullScreen();
+        } else if (elem.webkitRequestFullscreen) { // Chrome, Safari & Opera
+            elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) { // IE/Edge
+            elem.msRequestFullscreen();
         }
     }
 
