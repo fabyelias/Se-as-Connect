@@ -39,7 +39,7 @@
 
         <!-- Área principal dividida en dos modos -->
         <main class="main-content">
-            <!-- Panel izquierdo: Modo Señas (Comunicación por señas) -->
+            <!-- Panel izquierdo: Modo Señas -->
             <section class="panel panel-signs" id="panel-signs">
                 <div class="panel-header">
                     <h2>👐 Lengua de Señas → Texto/Audio</h2>
@@ -82,21 +82,12 @@
                     <select id="select-camera" class="select-camera"></select>
                 </div>
 
-                <!-- Panel de Entrenamiento (opcional, para Fase 2) -->
-                <div id="training-panel" class="training-panel hidden">
-                    <h3>Entrenamiento del Modelo</h3>
-                    <p>Graba ejemplos de señas para entrenar al modelo.</p>
-                    <div class="input-group">
-                        <input type="text" id="input-sign-name" placeholder="Nombre de la seña (ej: A)">
-                        <button id="btn-record-sample" class="btn btn-primary">Grabar Muestra</button>
-                    </div>
-                </div>
             </section>
 
             <!-- Separador visual -->
             <div class="panel-separator"></div>
 
-            <!-- Panel derecho: Modo Voz (Persona oyente comunica) -->
+            <!-- Panel derecho: Modo Voz -->
             <section class="panel panel-voice" id="panel-voice">
                 <div class="panel-header">
                     <h2>🎤 Voz → Texto</h2>
@@ -130,24 +121,17 @@
         </main>
     </div>
 
-    <!-- Modal de Instrucciones -->
+    <!-- Modal de Instrucciones (desactivado por defecto) -->
     <div id="modal-instructions" class="modal hidden">
         <div class="modal-content">
             <span id="btn-close-modal" class="close-button">&times;</span>
             <h2>¡Bienvenido a Señas Connect!</h2>
-            <p>Esta aplicación facilita la comunicación entre personas sordas y oyentes.</p>
+            <p>Esta aplicación facilita la comunicación entre personas con capacidad auditiva reducida y oyentes.</p>
             
             <h3>Cómo funciona:</h3>
             <ul>
                 <li><strong>Lengua de Señas a Voz:</strong> Inicia la cámara, haz una seña y la app la traducirá a texto y audio.</li>
                 <li><strong>Voz a Texto:</strong> Presiona "Comenzar a Escuchar", habla y la app mostrará el texto en pantalla.</li>
-            </ul>
-
-            <h3>Atajos de Teclado:</h3>
-            <ul>
-                <li><strong>Alt + C:</strong> Activar/Desactivar alto contraste.</li>
-                <li><strong>Alt + F:</strong> Cambiar tamaño de fuente.</li>
-                <li><strong>Alt + Enter:</strong> Activar/Desactivar pantalla completa.</li>
             </ul>
             <button id="btn-modal-got-it" class="btn btn-primary">Entendido</button>
         </div>

@@ -25,7 +25,7 @@
 
 html, body {
     height: 100%;
-    overflow: hidden; /* Evita el scroll en el nivel superior */
+    overflow: hidden;
 }
 
 body {
@@ -44,7 +44,7 @@ body {
 .app-container {
     display: flex;
     flex-direction: column;
-    height: 100vh; /* Ocupa toda la altura de la ventana */
+    height: 100vh;
     padding: 10px;
     gap: 10px;
 }
@@ -69,11 +69,11 @@ body {
    CONTENIDO PRINCIPAL (PANELES)
    ======================================== */
 .main-content {
-    flex: 1; /* Ocupa el espacio restante */
+    flex: 1;
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     gap: 10px;
-    min-height: 0; /* Clave para que el overflow funcione en grid/flex */
+    min-height: 0;
 }
 
 .panel {
@@ -84,7 +84,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    overflow-y: auto; /* Permite scroll interno si el contenido es muy grande */
+    overflow-y: auto;
 }
 
 .panel-separator {
@@ -110,7 +110,6 @@ body {
     border-radius: 12px;
     overflow: hidden;
     width: 100%;
-    /* Relación de aspecto 4:3 */
     aspect-ratio: 4 / 3;
 }
 
@@ -120,7 +119,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Usa cover para llenar el espacio */
+    object-fit: cover;
 }
 
 .camera-video { transform: scaleX(-1); }
@@ -176,11 +175,11 @@ body {
 .controls-group {
     display: flex;
     gap: 10px;
-    flex-wrap: wrap; /* Permite que los botones pasen a la siguiente línea */
+    flex-wrap: wrap;
 }
 
 .controls-group .btn {
-    flex: 1 1 auto; /* Crecen y se encogen según el espacio */
+    flex: 1 1 auto;
 }
 
 .modal {
@@ -207,18 +206,18 @@ body {
    ======================================== */
 @media (max-width: 768px) {
     html, body {
-        height: auto; /* Permite que el contenido determine la altura */
-        overflow: auto; /* Habilita el scroll general */
+        height: auto;
+        overflow: auto;
     }
 
     .app-container {
-        height: auto; /* La altura se adapta al contenido */
+        height: auto;
         padding: 8px;
     }
 
     .main-content {
-        grid-template-columns: 1fr; /* Una sola columna */
-        grid-template-rows: auto auto auto; /* Filas automáticas */
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto;
         height: auto;
     }
 
@@ -228,17 +227,18 @@ body {
     }
 
     .panel {
-        overflow-y: visible; /* Desactiva el scroll interno en móviles */
-        min-height: 300px; /* Altura mínima para que no se colapse */
+        overflow-y: visible;
+        min-height: 300px;
+        border: none; /* Eliminamos el borde que causa las líneas blancas */
     }
 
     .camera-container {
-        aspect-ratio: 16 / 9; /* Más panorámico para móviles */
+        aspect-ratio: 16 / 9;
     }
 
     .voice-text-container {
         font-size: 1.2rem;
-        min-height: 100px; /* Espacio mínimo para el texto */
+        min-height: 100px;
     }
 
     .app-header h1 {

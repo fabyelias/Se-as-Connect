@@ -119,7 +119,7 @@ const CONFIG = {
     // ========================================
     ui: {
         // Mostrar modal de instrucciones al inicio
-        showInstructionsOnStart: true,
+        showInstructionsOnStart: false,
 
         // Guardar preferencias de accesibilidad en localStorage
         savePreferences: true,
